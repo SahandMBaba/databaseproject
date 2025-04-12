@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 12, 2025 at 10:31 AM
+-- Generation Time: Apr 12, 2025 at 03:32 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -154,32 +154,35 @@ DELIMITER $$
 CREATE TRIGGER `automatic_transaction` AFTER INSERT ON `transaction` FOR EACH ROW BEGIN
   IF NEW.type = 'Delivered to Spacecraft' THEN
     IF NEW.resourceID = 1 THEN -- oxygen
-        UPDATE storage SET oxygen = oxygen - NEW.quantity WHERE id = 1;
-        UPDATE spacecraft SET oxygen = oxygen + NEW.quantity WHERE id = NEW.spaceCraftID;
-    ELSEIF NEW.resourceID = 2 THEN -- food
-        UPDATE storage SET food = food - NEW.quantity WHERE id = 1;
-        UPDATE spacecraft SET food = food + NEW.quantity WHERE id = NEW.spaceCraftID;
+        UPDATE resource SET quantity = quantity  - NEW.quantity WHERE resourceID = 1;
+        UPDATE spacecraft SET oxygen = oxygen + NEW.quantity WHERE spaceCraftID = NEW.spaceCraftID;
+   
+   ELSEIF NEW.resourceID = 2 THEN -- food
+        UPDATE resource SET quantity = quantity - NEW.quantity WHERE resourceID = 2;
+        UPDATE spacecraft SET food = food + NEW.quantity WHERE spaceCraftID = NEW.spaceCraftID;
+    
     ELSEIF NEW.resourceID = 3 THEN -- power
-        UPDATE storage SET power = power - NEW.quantity WHERE id = 1;
-        UPDATE spacecraft SET power = power + NEW.quantity WHERE id = NEW.spaceCraftID;
-    ELSEIF NEW.resourceID = 4 THEN -- water
-        UPDATE storage SET water = water - NEW.quantity WHERE id = 1;
-        UPDATE spacecraft SET water = water + NEW.quantity WHERE id = NEW.spaceCraftID;
+        UPDATE resource SET quantity = quantity - NEW.quantity WHERE resourceID = 3;
+        UPDATE spacecraft SET power = power + NEW.quantity WHERE spaceCraftID = NEW.spaceCraftID;
+   
+   ELSEIF NEW.resourceID = 4 THEN -- water
+        UPDATE resource SET quantity = quantity - NEW.quantity WHERE resourceID = 4;
+        UPDATE spacecraft SET water = water + NEW.quantity WHERE spaceCraftID = NEW.spaceCraftID;
     END IF;
     
 ELSEIF NEW.type = 'Returned to Storage' THEN
     IF NEW.resourceID = 1 THEN -- oxygen
-        UPDATE storage SET oxygen = oxygen + NEW.quantity WHERE id = 1;
-        UPDATE spacecraft SET oxygen = oxygen - NEW.quantity WHERE id = NEW.spaceCraftID;
+        UPDATE resource SET quantity = quantity + NEW.quantity WHERE resourceID = 1;
+        UPDATE spacecraft SET oxygen = oxygen - NEW.quantity WHERE spaceCraftID = NEW.spaceCraftID;
     ELSEIF NEW.resourceID = 2 THEN -- food
-        UPDATE storage SET food = food + NEW.quantity WHERE id = 1;
-        UPDATE spacecraft SET food = food - NEW.quantity WHERE id = NEW.spaceCraftID;
+        UPDATE resource SET quantity = quantity + NEW.quantity WHERE resourceID = 2;
+        UPDATE spacecraft SET food = food - NEW.quantity WHERE spaceCraftID = NEW.spaceCraftID;
     ELSEIF NEW.resourceID = 3 THEN -- power
-        UPDATE storage SET power = power + NEW.quantity WHERE id = 1;
-        UPDATE spacecraft SET power = power - NEW.quantity WHERE id = NEW.spaceCraftID;
+        UPDATE resource SET quantity = quantity + NEW.quantity WHERE resourceID = 3;
+        UPDATE spacecraft SET power = power - NEW.quantity WHERE spaceCraftID = NEW.spaceCraftID;
     ELSEIF NEW.resourceID = 4 THEN -- water
-        UPDATE storage SET water = water + NEW.quantity WHERE id = 1;
-        UPDATE spacecraft SET water = water - NEW.quantity WHERE id = NEW.spaceCraftID;
+        UPDATE resource SET quantity = quantity + NEW.quantity WHERE resourceID = 4;
+        UPDATE spacecraft SET water = water - NEW.quantity WHERE spaceCraftID = NEW.spaceCraftID;
     END IF;
 END IF;
 

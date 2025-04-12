@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 12, 2025 at 03:32 PM
+-- Generation Time: Apr 12, 2025 at 03:44 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -44,8 +44,8 @@ CREATE TABLE `astronaut` (
 
 CREATE TABLE `astronautspacecraft` (
   `ID` int(11) NOT NULL,
-  `spacecraftID` int(11) DEFAULT NULL,
-  `astronautID` int(11) DEFAULT NULL
+  `spacecraftID` int(11) NOT NULL,
+  `astronautID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -59,7 +59,7 @@ CREATE TABLE `experiment` (
   `name` varchar(90) NOT NULL,
   `description` varchar(300) DEFAULT NULL,
   `assignedAstronaut` int(11) DEFAULT NULL,
-  `result` enum('success','failed','aborted','on going') DEFAULT NULL
+  `result` enum('success','failed','aborted','on going') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -73,7 +73,7 @@ CREATE TABLE `mission` (
   `name` varchar(90) NOT NULL,
   `objective` varchar(120) DEFAULT NULL,
   `launchDate` date DEFAULT NULL,
-  `status` enum('on going','completed','aborted','planned') DEFAULT NULL,
+  `status` enum('on going','completed','aborted','planned') NOT NULL,
   `endDate` date DEFAULT NULL,
   `duration` decimal(5,2) GENERATED ALWAYS AS ((to_days(`endDate`) - to_days(`launchDate`)) / 30) STORED
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -86,8 +86,8 @@ CREATE TABLE `mission` (
 
 CREATE TABLE `missionexperiment` (
   `missionExperimentID` int(11) NOT NULL,
-  `experimentID` int(11) DEFAULT NULL,
-  `missionID` int(11) DEFAULT NULL
+  `experimentID` int(11) NOT NULL,
+  `missionID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -126,10 +126,10 @@ CREATE TABLE `spacecraft` (
   `arrivalDate` date DEFAULT NULL,
   `departureDate` date DEFAULT NULL,
   `status` enum('Completed','Scheduled','In Progress') DEFAULT NULL,
-  `oxygen` int(11) NOT NULL,
-  `food` int(11) NOT NULL,
-  `power` int(11) NOT NULL,
-  `water` int(11) NOT NULL
+  `oxygen` int(11) NOT NULL DEFAULT 0,
+  `food` int(11) NOT NULL DEFAULT 0,
+  `power` int(11) NOT NULL DEFAULT 0,
+  `water` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -140,11 +140,11 @@ CREATE TABLE `spacecraft` (
 
 CREATE TABLE `transaction` (
   `ID` int(11) NOT NULL,
-  `resourceID` int(11) DEFAULT NULL,
-  `spacecraftID` int(11) DEFAULT NULL,
+  `resourceID` int(11) NOT NULL,
+  `spacecraftID` int(11) NOT NULL,
   `date` timestamp NULL DEFAULT NULL,
-  `type` enum('Delivered to Spacecraft','Returned to Storage') DEFAULT NULL,
-  `quantity` decimal(10,0) DEFAULT NULL
+  `type` enum('Delivered to Spacecraft','Returned to Storage') NOT NULL,
+  `quantity` decimal(10,0) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

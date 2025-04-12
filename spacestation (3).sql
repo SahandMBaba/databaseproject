@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 08, 2025 at 05:42 PM
+-- Generation Time: Apr 12, 2025 at 10:31 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -100,8 +100,19 @@ CREATE TABLE `resource` (
   `resourceID` int(11) NOT NULL,
   `type` varchar(90) NOT NULL,
   `lastRestockDate` date DEFAULT NULL,
-  `quantity` decimal(5,2) NOT NULL
+  `quantity` decimal(5,2) NOT NULL,
+  `unit` varchar(90) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `resource`
+--
+
+INSERT INTO `resource` (`resourceID`, `type`, `lastRestockDate`, `quantity`, `unit`) VALUES
+(1, 'oxygen', '2025-04-01', 600.00, 'liters'),
+(2, 'food', '2025-04-01', 300.00, 'kg'),
+(3, 'power', '2025-04-01', 999.99, 'watt'),
+(4, 'water', '2025-04-01', 800.00, 'liters');
 
 -- --------------------------------------------------------
 
@@ -114,7 +125,11 @@ CREATE TABLE `spacecraft` (
   `name` varchar(90) NOT NULL,
   `arrivalDate` date DEFAULT NULL,
   `departureDate` date DEFAULT NULL,
-  `status` enum('Completed','Scheduled','In Progress') DEFAULT NULL
+  `status` enum('Completed','Scheduled','In Progress') DEFAULT NULL,
+  `oxygen` int(11) NOT NULL,
+  `food` int(11) NOT NULL,
+  `power` int(11) NOT NULL,
+  `water` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -127,10 +142,50 @@ CREATE TABLE `transaction` (
   `ID` int(11) NOT NULL,
   `resourceID` int(11) DEFAULT NULL,
   `spacecraftID` int(11) DEFAULT NULL,
-  `date` date DEFAULT NULL,
+  `date` timestamp NULL DEFAULT NULL,
   `type` enum('Delivered to Spacecraft','Returned to Storage') DEFAULT NULL,
   `quantity` decimal(10,0) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Triggers `transaction`
+--
+DELIMITER $$
+CREATE TRIGGER `automatic_transaction` AFTER INSERT ON `transaction` FOR EACH ROW BEGIN
+  IF NEW.type = 'Delivered to Spacecraft' THEN
+    IF NEW.resourceID = 1 THEN -- oxygen
+        UPDATE storage SET oxygen = oxygen - NEW.quantity WHERE id = 1;
+        UPDATE spacecraft SET oxygen = oxygen + NEW.quantity WHERE id = NEW.spaceCraftID;
+    ELSEIF NEW.resourceID = 2 THEN -- food
+        UPDATE storage SET food = food - NEW.quantity WHERE id = 1;
+        UPDATE spacecraft SET food = food + NEW.quantity WHERE id = NEW.spaceCraftID;
+    ELSEIF NEW.resourceID = 3 THEN -- power
+        UPDATE storage SET power = power - NEW.quantity WHERE id = 1;
+        UPDATE spacecraft SET power = power + NEW.quantity WHERE id = NEW.spaceCraftID;
+    ELSEIF NEW.resourceID = 4 THEN -- water
+        UPDATE storage SET water = water - NEW.quantity WHERE id = 1;
+        UPDATE spacecraft SET water = water + NEW.quantity WHERE id = NEW.spaceCraftID;
+    END IF;
+    
+ELSEIF NEW.type = 'Returned to Storage' THEN
+    IF NEW.resourceID = 1 THEN -- oxygen
+        UPDATE storage SET oxygen = oxygen + NEW.quantity WHERE id = 1;
+        UPDATE spacecraft SET oxygen = oxygen - NEW.quantity WHERE id = NEW.spaceCraftID;
+    ELSEIF NEW.resourceID = 2 THEN -- food
+        UPDATE storage SET food = food + NEW.quantity WHERE id = 1;
+        UPDATE spacecraft SET food = food - NEW.quantity WHERE id = NEW.spaceCraftID;
+    ELSEIF NEW.resourceID = 3 THEN -- power
+        UPDATE storage SET power = power + NEW.quantity WHERE id = 1;
+        UPDATE spacecraft SET power = power - NEW.quantity WHERE id = NEW.spaceCraftID;
+    ELSEIF NEW.resourceID = 4 THEN -- water
+        UPDATE storage SET water = water + NEW.quantity WHERE id = 1;
+        UPDATE spacecraft SET water = water - NEW.quantity WHERE id = NEW.spaceCraftID;
+    END IF;
+END IF;
+
+END
+$$
+DELIMITER ;
 
 --
 -- Indexes for dumped tables
@@ -228,7 +283,7 @@ ALTER TABLE `missionexperiment`
 -- AUTO_INCREMENT for table `resource`
 --
 ALTER TABLE `resource`
-  MODIFY `resourceID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `resourceID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `spacecraft`

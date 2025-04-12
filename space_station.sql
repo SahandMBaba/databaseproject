@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 12, 2025 at 03:44 PM
+-- Generation Time: Apr 12, 2025 at 05:23 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `spacestation`
+-- Database: `space station`
 --
 
 -- --------------------------------------------------------
@@ -35,6 +35,22 @@ CREATE TABLE `astronaut` (
   `missionID` int(11) DEFAULT NULL,
   `role` enum('Commander','Pilot','Mission Specialist','Flight Engineer','Payload Specialist','Science Officer','Medical Officer','Navigation Officer','Communication Officer','Backup Crew') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `astronaut`
+--
+
+INSERT INTO `astronaut` (`astronautID`, `name`, `healthStatus`, `nationality`, `missionID`, `role`) VALUES
+(1, 'Alice Vega', 'Active', 'USA', 1, 'Commander'),
+(2, 'Bao Zhang', 'Active', 'China', 2, 'Pilot'),
+(3, 'Carlos Díaz', 'On Leave', 'Mexico', 3, 'Science Officer'),
+(4, 'Daria Ivanova', 'Active', 'Russia', 4, 'Mission Specialist'),
+(5, 'Elena Petrova', 'Inactive', 'Russia', 5, 'Flight Engineer'),
+(6, 'Faisal Khan', 'Active', 'UAE', 6, 'Medical Officer'),
+(7, 'Grace Kim', 'On Leave', 'South Korea', 7, 'Payload Specialist'),
+(8, 'Hans Müller', 'Active', 'Germany', 8, 'Backup Crew'),
+(9, 'Isabella Rossi', 'Active', 'Italy', 9, 'Navigation Officer'),
+(10, 'James Carter', 'Active', 'Canada', 10, 'Communication Officer');
 
 -- --------------------------------------------------------
 
@@ -62,6 +78,22 @@ CREATE TABLE `experiment` (
   `result` enum('success','failed','aborted','on going') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `experiment`
+--
+
+INSERT INTO `experiment` (`experimentID`, `name`, `description`, `assignedAstronaut`, `result`) VALUES
+(1, 'Photosynthesis in Microgravity', 'Studying plant growth without gravity.', 1, 'success'),
+(2, 'Bone Density Analysis', 'Tracking bone loss in zero-G.', 2, 'on going'),
+(3, 'Radiation Exposure', 'Measuring radiation inside spacecraft.', 3, 'success'),
+(4, 'Fluid Dynamics', 'Observing water movement in microgravity.', 4, 'failed'),
+(5, 'Combustion Study', 'Testing fire behavior.', 5, 'on going'),
+(6, 'Muscle Atrophy', 'Monitoring astronaut muscle health.', 6, 'aborted'),
+(7, 'Bacteria Mutation', 'Examining bacteria resistance.', 7, 'on going'),
+(8, 'Crop Growth', 'Testing lettuce in space farms.', 8, 'success'),
+(9, 'Oxygen Recycling', 'Testing onboard O2 systems.', 9, 'on going'),
+(10, 'VR in Isolation', 'Studying VR effects in space.', 10, 'success');
+
 -- --------------------------------------------------------
 
 --
@@ -77,6 +109,22 @@ CREATE TABLE `mission` (
   `endDate` date DEFAULT NULL,
   `duration` decimal(5,2) GENERATED ALWAYS AS ((to_days(`endDate`) - to_days(`launchDate`)) / 30) STORED
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `mission`
+--
+
+INSERT INTO `mission` (`missionID`, `name`, `objective`, `launchDate`, `status`, `endDate`) VALUES
+(1, 'Lunar Explorer', 'Study moon soil composition', '2025-01-15', 'completed', '2025-02-14'),
+(2, 'Mars Pioneer', 'Establish Mars base', '2025-03-10', 'on going', NULL),
+(3, 'Orbital Surveyor', 'Map asteroid belt', '2024-11-01', 'completed', '2024-12-10'),
+(4, 'Deep Space Probe', 'Test long-range systems', '2025-04-01', 'planned', NULL),
+(5, 'ISS Resupply', 'Deliver resources', '2025-02-20', 'completed', '2025-03-01'),
+(6, 'Solar Study', 'Analyze solar flares', '2025-01-01', 'completed', '2025-01-25'),
+(7, 'Gravity Test', 'Microgravity effects on bone', '2025-04-01', 'on going', NULL),
+(8, 'Atmospheric Sampling', 'Sample upper atmosphere', '2025-03-05', 'aborted', '2025-03-06'),
+(9, 'Space Farming', 'Grow crops in orbit', '2025-01-10', 'completed', '2025-03-10'),
+(10, 'Moon Relay', 'Deploy communication satellites', '2025-02-10', 'completed', '2025-02-28');
 
 -- --------------------------------------------------------
 
@@ -109,10 +157,10 @@ CREATE TABLE `resource` (
 --
 
 INSERT INTO `resource` (`resourceID`, `type`, `lastRestockDate`, `quantity`, `unit`) VALUES
-(1, 'oxygen', '2025-04-01', 600.00, 'liters'),
-(2, 'food', '2025-04-01', 300.00, 'kg'),
-(3, 'power', '2025-04-01', 999.99, 'watt'),
-(4, 'water', '2025-04-01', 800.00, 'liters');
+(1, 'oxygen', '2025-04-01', 430.00, 'liters'),
+(2, 'food', '2025-04-01', 165.00, 'kg'),
+(3, 'power', '2025-04-01', 849.99, 'watt'),
+(4, 'water', '2025-04-01', 680.00, 'liters');
 
 -- --------------------------------------------------------
 
@@ -132,6 +180,22 @@ CREATE TABLE `spacecraft` (
   `water` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `spacecraft`
+--
+
+INSERT INTO `spacecraft` (`spaceCraftID`, `name`, `arrivalDate`, `departureDate`, `status`, `oxygen`, `food`, `power`, `water`) VALUES
+(1, 'Orion', '2025-03-01', '2025-03-15', 'Completed', 180, 145, 350, 270),
+(2, 'Endeavour', '2025-03-10', '2025-03-20', 'Completed', 180, 140, 180, 130),
+(3, 'Discovery', '2025-04-01', NULL, 'In Progress', 60, 50, 120, 110),
+(4, 'Atlantis', '2025-04-05', NULL, 'In Progress', 70, 60, 140, 120),
+(5, 'Challenger', '2025-04-10', '2025-04-25', 'Completed', 80, 65, 160, 140),
+(6, 'Columbia', '2025-04-12', NULL, 'Scheduled', 0, 0, 0, 0),
+(7, 'Starliner', '2025-04-15', NULL, 'Scheduled', 0, 0, 0, 0),
+(8, 'Crew Dragon', '2025-04-18', NULL, 'Scheduled', 0, 0, 0, 0),
+(9, 'New Shepard', '2025-04-20', NULL, 'Scheduled', 0, 0, 0, 0),
+(10, 'Dream Chaser', '2025-04-22', NULL, 'Scheduled', 0, 0, 0, 0);
+
 -- --------------------------------------------------------
 
 --
@@ -146,6 +210,22 @@ CREATE TABLE `transaction` (
   `type` enum('Delivered to Spacecraft','Returned to Storage') NOT NULL,
   `quantity` decimal(10,0) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `transaction`
+--
+
+INSERT INTO `transaction` (`ID`, `resourceID`, `spacecraftID`, `date`, `type`, `quantity`) VALUES
+(1, 1, 1, '2025-04-01 05:00:00', 'Delivered to Spacecraft', 100),
+(2, 2, 1, '2025-04-01 05:05:00', 'Delivered to Spacecraft', 80),
+(3, 3, 1, '2025-04-01 05:10:00', 'Delivered to Spacecraft', 200),
+(4, 4, 1, '2025-04-01 05:15:00', 'Delivered to Spacecraft', 150),
+(5, 1, 2, '2025-04-02 06:00:00', 'Delivered to Spacecraft', 90),
+(6, 2, 2, '2025-04-02 06:05:00', 'Delivered to Spacecraft', 70),
+(7, 1, 1, '2025-04-05 07:00:00', 'Returned to Storage', 20),
+(8, 2, 1, '2025-04-05 07:05:00', 'Returned to Storage', 15),
+(9, 3, 1, '2025-04-05 07:10:00', 'Returned to Storage', 50),
+(10, 4, 1, '2025-04-05 07:15:00', 'Returned to Storage', 30);
 
 --
 -- Triggers `transaction`
@@ -256,7 +336,7 @@ ALTER TABLE `transaction`
 -- AUTO_INCREMENT for table `astronaut`
 --
 ALTER TABLE `astronaut`
-  MODIFY `astronautID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `astronautID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `astronautspacecraft`
@@ -268,13 +348,13 @@ ALTER TABLE `astronautspacecraft`
 -- AUTO_INCREMENT for table `experiment`
 --
 ALTER TABLE `experiment`
-  MODIFY `experimentID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `experimentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `mission`
 --
 ALTER TABLE `mission`
-  MODIFY `missionID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `missionID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `missionexperiment`
@@ -292,13 +372,13 @@ ALTER TABLE `resource`
 -- AUTO_INCREMENT for table `spacecraft`
 --
 ALTER TABLE `spacecraft`
-  MODIFY `spaceCraftID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `spaceCraftID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `transaction`
 --
 ALTER TABLE `transaction`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables

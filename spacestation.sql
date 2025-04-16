@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 16, 2025 at 12:18 PM
+-- Generation Time: Apr 16, 2025 at 01:10 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,8 +18,23 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `space station`
+-- Database: `spacica`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `active_astronauts`
+-- (See below for the actual view)
+--
+CREATE TABLE `active_astronauts` (
+`astronautID` int(11)
+,`name` varchar(90)
+,`healthStatus` enum('Active','Inactive','On Leave')
+,`nationality` varchar(90)
+,`missionID` int(11)
+,`role` enum('Commander','Pilot','Mission Specialist','Flight Engineer','Payload Specialist','Science Officer','Medical Officer','Navigation Officer','Communication Officer','Backup Crew')
+);
 
 -- --------------------------------------------------------
 
@@ -153,7 +168,22 @@ INSERT INTO `mission` (`missionID`, `name`, `objective`, `launchDate`, `status`,
 (7, 'Gravity Test', 'Microgravity effects on bone', '2025-04-01', 'on going', NULL),
 (8, 'Atmospheric Sampling', 'Sample upper atmosphere', '2025-03-05', 'aborted', '2025-03-06'),
 (9, 'Space Farming', 'Grow crops in orbit', '2025-01-10', 'on going', NULL),
-(10, 'Moon Relay', 'Deploy communication satellites', '2025-02-10', 'completed', '2025-02-28');
+(10, 'Moon Relay', 'Deploy communication satellites', '2025-02-10', 'completed', '2025-02-28'),
+(11, 'Artemis III', 'Lunar landing with crew', '2026-11-15', 'planned', NULL);
+
+--
+-- Triggers `mission`
+--
+DELIMITER $$
+CREATE TRIGGER `update_mission_to_completed` AFTER UPDATE ON `mission` FOR EACH ROW BEGIN
+    IF OLD.launchDate < CURRENT_DATE AND OLD.status = 'Active' THEN
+        UPDATE mission
+        SET status = 'Completed'
+        WHERE missionId = OLD.missionId;
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -367,6 +397,40 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `upcoming_missions`
+-- (See below for the actual view)
+--
+CREATE TABLE `upcoming_missions` (
+`mission_name` varchar(90)
+,`objective` varchar(120)
+,`launchDate` date
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `wasteperspacecraft`
+-- (See below for the actual view)
+--
+CREATE TABLE `wasteperspacecraft` (
+`spacecraftID` int(11)
+,`total_delivered` decimal(32,0)
+,`total_returned` decimal(32,0)
+,`total_wasted` decimal(33,0)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `active_astronauts`
+--
+DROP TABLE IF EXISTS `active_astronauts`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `active_astronauts`  AS SELECT `astronaut`.`astronautID` AS `astronautID`, `astronaut`.`name` AS `name`, `astronaut`.`healthStatus` AS `healthStatus`, `astronaut`.`nationality` AS `nationality`, `astronaut`.`missionID` AS `missionID`, `astronaut`.`role` AS `role` FROM `astronaut` WHERE `astronaut`.`healthStatus` = 'active' ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `active_astronauts_missions`
 --
 DROP TABLE IF EXISTS `active_astronauts_missions`;
@@ -399,6 +463,24 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 DROP TABLE IF EXISTS `spacecraft_resources_status`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `spacecraft_resources_status`  AS SELECT `spacecraft`.`spaceCraftID` AS `spacecraftID`, `spacecraft`.`name` AS `name`, `spacecraft`.`status` AS `status`, `spacecraft`.`oxygen` AS `oxygen`, `spacecraft`.`food` AS `food`, `spacecraft`.`power` AS `power`, `spacecraft`.`water` AS `water`, CASE WHEN `spacecraft`.`oxygen` < 50 THEN 'Oxygen' ELSE NULL END AS `low_oxygen`, CASE WHEN `spacecraft`.`food` < 50 THEN 'Food' ELSE NULL END AS `low_food`, CASE WHEN `spacecraft`.`power` < 50 THEN 'Power' ELSE NULL END AS `low_power`, CASE WHEN `spacecraft`.`water` < 50 THEN 'Water' ELSE NULL END AS `low_water`, concat(case when `spacecraft`.`oxygen` < 50 then 'Oxygen' else NULL end,case when `spacecraft`.`food` < 50 then ', Food' else NULL end,case when `spacecraft`.`power` < 50 then ', Power' else NULL end,case when `spacecraft`.`water` < 50 then ', Water' else NULL end) AS `low_resources` FROM `spacecraft` WHERE `spacecraft`.`status` = 'In Progress' ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `upcoming_missions`
+--
+DROP TABLE IF EXISTS `upcoming_missions`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `upcoming_missions`  AS SELECT `mission`.`name` AS `mission_name`, `mission`.`objective` AS `objective`, `mission`.`launchDate` AS `launchDate` FROM `mission` WHERE `mission`.`status` = 'planned' ORDER BY `mission`.`launchDate` ASC ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `wasteperspacecraft`
+--
+DROP TABLE IF EXISTS `wasteperspacecraft`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `wasteperspacecraft`  AS SELECT `transaction`.`spacecraftID` AS `spacecraftID`, sum(case when `transaction`.`type` = 'Delivered to Spacecraft' then `transaction`.`quantity` else 0 end) AS `total_delivered`, sum(case when `transaction`.`type` = 'Returned to Storage' then `transaction`.`quantity` else 0 end) AS `total_returned`, sum(case when `transaction`.`type` = 'Delivered to Spacecraft' then `transaction`.`quantity` else 0 end) - sum(case when `transaction`.`type` = 'Returned to Storage' then `transaction`.`quantity` else 0 end) AS `total_wasted` FROM `transaction` GROUP BY `transaction`.`spacecraftID` ;
 
 --
 -- Indexes for dumped tables
@@ -484,7 +566,7 @@ ALTER TABLE `experiment`
 -- AUTO_INCREMENT for table `mission`
 --
 ALTER TABLE `mission`
-  MODIFY `missionID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `missionID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `missionexperiment`

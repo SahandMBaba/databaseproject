@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 16, 2025 at 01:10 PM
+-- Generation Time: Apr 28, 2025 at 11:55 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `spacica`
+-- Database: `new fix`
 --
 
 -- --------------------------------------------------------
@@ -175,11 +175,9 @@ INSERT INTO `mission` (`missionID`, `name`, `objective`, `launchDate`, `status`,
 -- Triggers `mission`
 --
 DELIMITER $$
-CREATE TRIGGER `update_mission_to_completed` AFTER UPDATE ON `mission` FOR EACH ROW BEGIN
-    IF OLD.launchDate < CURRENT_DATE AND OLD.status = 'Active' THEN
-        UPDATE mission
-        SET status = 'Completed'
-        WHERE missionId = OLD.missionId;
+CREATE TRIGGER `updateMissionStatus` BEFORE UPDATE ON `mission` FOR EACH ROW BEGIN
+    IF NEW.launchDate < CURRENT_DATE AND NEW.status = 'planned' THEN
+        SET NEW.status = 'on going';
     END IF;
 END
 $$
